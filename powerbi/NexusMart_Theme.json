@@ -1,0 +1,33 @@
+{
+  "name": "NexusMart Executive",
+  "dataColors": ["#0B3C5D", "#1D9A8E", "#F2A541", "#D1495B", "#6C5CE7", "#5C8EC4", "#8FB339", "#A0A7B0"],
+  "background": "#FFFFFF",
+  "foreground": "#1F2933",
+  "tableAccent": "#0B3C5D",
+  "good": "#1D9A8E",
+  "neutral": "#F2A541",
+  "bad": "#D1495B",
+  "maximum": "#0B3C5D",
+  "center": "#F2A541",
+  "minimum": "#D1495B",
+  "textClasses": {
+    "title": {"fontSize": 12, "fontFace": "Segoe UI Semibold", "color": "#0B3C5D"},
+    "label": {"fontSize": 10, "fontFace": "Segoe UI", "color": "#52606D"},
+    "callout": {"fontSize": 26, "fontFace": "Segoe UI Semibold", "color": "#0B3C5D"},
+    "header": {"fontSize": 11, "fontFace": "Segoe UI Semibold", "color": "#0B3C5D"}
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{"show": true, "color": {"solid": {"color": "#FFFFFF"}}, "transparency": 0}],
+        "border": [{"show": true, "color": {"solid": {"color": "#E1E5EA"}}, "radius": 6}],
+        "title": [{"show": true, "fontColor": {"solid": {"color": "#0B3C5D"}}, "fontSize": 12, "fontFamily": "Segoe UI Semibold"}]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{"color": {"solid": {"color": "#F4F6F8"}}, "transparency": 0}]
+      }
+    }
+  }
+}

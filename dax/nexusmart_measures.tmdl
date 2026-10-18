@@ -1,0 +1,255 @@
+createOrReplace
+
+	ref table FactSales
+
+		measure 'Gross Sales' = SUM ( FactSales[gross_amount] )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure NMV = CALCULATE ( SUM ( FactSales[net_amount] ), FactSales[is_cancelled] = FALSE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure Refunds = CALCULATE ( SUM ( FactSales[returned_amount] ), FactSales[is_cancelled] = FALSE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Net Revenue' = [NMV] - [Refunds]
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure Orders = CALCULATE ( DISTINCTCOUNT ( FactSales[order_id] ), FactSales[is_cancelled] = FALSE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'All Orders' = DISTINCTCOUNT ( FactSales[order_id] )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Cancelled Orders' = CALCULATE ( DISTINCTCOUNT ( FactSales[order_id] ), FactSales[is_cancelled] = TRUE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Cancellation Rate' = DIVIDE ( [Cancelled Orders], [All Orders] )
+			formatString: 0.0%
+			displayFolder: Core KPIs
+
+		measure Units = CALCULATE ( SUM ( FactSales[quantity] ), FactSales[is_cancelled] = FALSE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure AOV = DIVIDE ( [NMV], [Orders] )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Delivered Lines' = CALCULATE ( COUNTROWS ( FactSales ), FactSales[is_delivered] = TRUE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Returned Lines' = CALCULATE ( COUNTROWS ( FactSales ), FactSales[is_returned] = TRUE (), FactSales[is_delivered] = TRUE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Return Rate' = DIVIDE ( [Returned Lines], [Delivered Lines] )
+			formatString: 0.0%
+			displayFolder: Core KPIs
+
+		measure COGS = CALCULATE ( SUM ( FactSales[cost_amount] ), FactSales[is_kept] = TRUE () )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure Margin = [Net Revenue] - [COGS]
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Margin %' = DIVIDE ( [Margin], [Net Revenue] )
+			formatString: 0.0%
+			displayFolder: Core KPIs
+
+		measure 'Active Customers' = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_cancelled] = FALSE (), FactSales[customer_key] <> -1 )
+			formatString: #,0
+			displayFolder: Core KPIs
+
+		measure 'Cancelled Gross' = CALCULATE ( SUM ( FactSales[gross_amount] ), FactSales[is_cancelled] = TRUE () )
+			formatString: #,0
+			displayFolder: Profitability
+
+		measure 'Discounts Given' = CALCULATE ( SUM ( FactSales[discount_amount] ), FactSales[is_cancelled] = FALSE () )
+			formatString: #,0
+			displayFolder: Profitability
+
+		measure 'Effective Discount %' = DIVIDE ( [Discounts Given], CALCULATE ( SUM ( FactSales[gross_amount] ), FactSales[is_cancelled] = FALSE () ) )
+			formatString: 0.0%
+			displayFolder: Profitability
+
+		measure 'Gross to Net Gap' = [Gross Sales] - [Net Revenue]
+			formatString: #,0
+			displayFolder: Profitability
+
+		measure 'Net Revenue % of Gross' = DIVIDE ( [Net Revenue], [Gross Sales] )
+			formatString: 0.0%
+			displayFolder: Profitability
+
+		measure 'Shipping Cost' = SUM ( FactSales[shipping_fee] )
+			formatString: #,0
+			displayFolder: Profitability
+
+		measure 'Margin After Shipping' = [Margin] - [Shipping Cost]
+			formatString: #,0
+			displayFolder: Profitability
+
+		measure 'Margin After Shipping %' = DIVIDE ( [Margin After Shipping], [Net Revenue] )
+			formatString: 0.0%
+			displayFolder: Profitability
+
+		measure 'Net Revenue Share %' = DIVIDE ( [Net Revenue], CALCULATE ( [Net Revenue], ALLSELECTED () ) )
+			formatString: 0.0%
+			displayFolder: Profitability
+
+		measure 'NMV Share %' = DIVIDE ( [NMV], CALCULATE ( [NMV], ALLSELECTED () ) )
+			formatString: 0.0%
+			displayFolder: Profitability
+
+		measure 'Net Revenue PM' =
+				VAR m = [Latest Month]
+				RETURN CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+			formatString: #,0
+			displayFolder: Time
+
+		measure 'Net Revenue MoM %' =
+				VAR m = [Latest Month]
+				VAR cur = CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+				VAR prev = CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+				RETURN DIVIDE ( cur - prev, prev )
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'NMV PM' =
+				VAR m = [Latest Month]
+				RETURN CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+			formatString: #,0
+			displayFolder: Time
+
+		measure 'NMV MoM %' =
+				VAR m = [Latest Month]
+				VAR cur = CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+				VAR prev = CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+				RETURN DIVIDE ( cur - prev, prev )
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'Orders PM' =
+				VAR m = [Latest Month]
+				RETURN CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+			formatString: #,0
+			displayFolder: Time
+
+		measure 'Orders MoM %' =
+				VAR m = [Latest Month]
+				VAR cur = CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+				VAR prev = CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+				RETURN DIVIDE ( cur - prev, prev )
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'Latest Month' =
+				VAR d = MAX ( FactSales[date_key] )
+				RETURN IF ( ISBLANK ( d ), BLANK (), DATE ( INT ( d / 10000 ), MOD ( INT ( d / 100 ), 100 ), 1 ) )
+			displayFolder: Time
+
+		measure 'Latest Month Label' = FORMAT ( [Latest Month], "mmm yyyy" )
+			displayFolder: Time
+
+		measure 'Latest MoM % Net Revenue' = [Net Revenue MoM %]
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'Latest MoM % NMV' = [NMV MoM %]
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'Latest MoM % Orders' = [Orders MoM %]
+			formatString: 0.0%
+			displayFolder: Time
+
+		measure 'Net Revenue 3M Avg' =
+				VAR m = [Latest Month]
+				VAR months = FILTER ( ALL ( DimDate[month_start_date] ), DimDate[month_start_date] > EDATE ( m, -3 ) && DimDate[month_start_date] <= m )
+				RETURN AVERAGEX ( months, VAR v = DimDate[month_start_date] RETURN CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = v ) )
+			formatString: #,0
+			displayFolder: Time
+
+		measure 'Days With Sales' = COUNTROWS ( FILTER ( VALUES ( DimDate[full_date] ), [Gross Sales] > 0 ) )
+			formatString: #,0
+			displayFolder: Seasonality
+
+		measure 'Avg Daily NMV' = DIVIDE ( [NMV], [Days With Sales] )
+			formatString: #,0
+			displayFolder: Seasonality
+
+		measure 'Avg Daily Orders' = DIVIDE ( [Orders], [Days With Sales] )
+			formatString: #,0.0
+			displayFolder: Seasonality
+
+		measure 'Avg Daily NMV Regular Days' = CALCULATE ( [Avg Daily NMV], DimDate[festival] = "Regular Day" )
+			formatString: #,0
+			displayFolder: Seasonality
+
+		measure 'Festival Lift %' = DIVIDE ( [Avg Daily NMV], [Avg Daily NMV Regular Days] ) - 1
+			formatString: 0.0%
+			displayFolder: Seasonality
+
+		measure 'New Customers' = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_first_order] = TRUE (), FactSales[customer_key] <> -1 )
+			formatString: #,0
+			displayFolder: Customers
+
+		measure 'Returning Customers' = [Active Customers] - [New Customers]
+			formatString: #,0
+			displayFolder: Customers
+
+		measure 'Repeat Customers' = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_cancelled] = FALSE (), DimCustomer[rfm_frequency] >= 2 )
+			formatString: #,0
+			displayFolder: Customers
+
+		measure 'Repeat Purchase Rate' = DIVIDE ( [Repeat Customers], [Active Customers] )
+			formatString: 0.0%
+			displayFolder: Customers
+
+		measure 'Observed CLV' = DIVIDE ( [Net Revenue], [Active Customers] )
+			formatString: #,0
+			displayFolder: Customers
+
+		measure 'Observed CLV Margin' = DIVIDE ( [Margin], [Active Customers] )
+			formatString: #,0
+			displayFolder: Customers
+
+		measure 'Orders per Customer' = DIVIDE ( [Orders], [Active Customers] )
+			formatString: #,0.0
+			displayFolder: Customers
+
+		measure 'On-Time Lines' = CALCULATE ( COUNTROWS ( FactSales ), FactSales[on_time_status] = "On Time" )
+			formatString: #,0
+			displayFolder: Delivery and Sellers
+
+		measure 'Late Lines' = CALCULATE ( COUNTROWS ( FactSales ), FactSales[on_time_status] = "Late" )
+			formatString: #,0
+			displayFolder: Delivery and Sellers
+
+		measure 'On-Time Delivery Rate' = DIVIDE ( [On-Time Lines], [On-Time Lines] + [Late Lines] )
+			formatString: 0.0%
+			displayFolder: Delivery and Sellers
+
+		measure 'Avg Shipping Days' = CALCULATE ( AVERAGE ( FactSales[shipping_days] ), FactSales[is_delivered] = TRUE () )
+			formatString: #,0.0
+			displayFolder: Delivery and Sellers
+
+		measure 'Avg Seller Quality Score' = AVERAGE ( DimSeller[quality_score] )
+			formatString: #,0.0
+			displayFolder: Delivery and Sellers
+
+		measure 'Top 5 Cities NMV Share' =
+				VAR top5 = TOPN ( 5, FILTER ( ALLSELECTED ( DimLocation[city] ), DimLocation[city] <> "Unknown" ), [NMV], DESC )
+				RETURN DIVIDE ( SUMX ( top5, [NMV] ), CALCULATE ( [NMV], ALLSELECTED ( DimLocation ) ) )
+			formatString: #,0
+			displayFolder: Geography
+

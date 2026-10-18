@@ -1,0 +1,78 @@
+{
+  "order_total_reconciliation_pct": 99.27,
+  "orders_checked": 159512,
+  "rejects_by_reason": {
+    "DELIVERED_BEFORE_SHIPPED": 1345,
+    "DELIVERY_OVER_30_DAYS": 278,
+    "DUPLICATE_CUSTOMER_MERGED": 2556,
+    "DUPLICATE_PRODUCT_MERGED": 26,
+    "EXACT_DUPLICATE_ROW": 6496,
+    "INVALID_DELIVERED_DATE": 924,
+    "ORPHAN_ORDER_ITEM": 139
+  },
+  "tables": {
+    "locations": {
+      "table": "locations",
+      "rows_raw": 650,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 0,
+      "rows_clean": 650
+    },
+    "sellers": {
+      "table": "sellers",
+      "rows_raw": 420,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 0,
+      "rows_clean": 420
+    },
+    "products": {
+      "table": "products",
+      "rows_raw": 3200,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 26,
+      "rows_clean": 3174
+    },
+    "orders": {
+      "table": "orders",
+      "rows_raw": 163200,
+      "exact_duplicates_removed": 3200,
+      "rows_rejected": 0,
+      "rows_clean": 160000
+    },
+    "order_items": {
+      "table": "order_items",
+      "rows_raw": 315143,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 0,
+      "rows_clean": 315143
+    },
+    "payments": {
+      "table": "payments",
+      "rows_raw": 168111,
+      "exact_duplicates_removed": 3296,
+      "rows_rejected": 0,
+      "rows_clean": 164815
+    },
+    "shipping": {
+      "table": "shipping",
+      "rows_raw": 151228,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 0,
+      "rows_clean": 151228
+    },
+    "returns": {
+      "table": "returns",
+      "rows_raw": 16048,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 139,
+      "rows_clean": 15909
+    },
+    "customers": {
+      "table": "customers",
+      "rows_raw": 45000,
+      "exact_duplicates_removed": 0,
+      "rows_rejected": 2556,
+      "rows_clean": 42444
+    }
+  }
+}

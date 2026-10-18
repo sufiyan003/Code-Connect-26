@@ -1,0 +1,10 @@
+file,rows
+customers.csv,45000
+products.csv,3200
+sellers.csv,420
+locations.csv,650
+orders.csv,163200
+order_items.csv,315143
+payments.csv,168111
+shipping.csv,151228
+returns.csv,16048

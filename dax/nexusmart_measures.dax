@@ -1,0 +1,122 @@
+// NexusMart measures. Paste into Power BI Desktop > DAX query view, click Run, then "Update model with changes".
+// Tables must be named: FactSales, DimDate, DimCustomer, DimProduct, DimSeller, DimLocation.
+DEFINE
+// ---------------------------------------------------------------- official metrics (brief section 9)
+MEASURE FactSales[Gross Sales] = SUM ( FactSales[gross_amount] )
+MEASURE FactSales[NMV] = CALCULATE ( SUM ( FactSales[net_amount] ), FactSales[is_cancelled] = FALSE () )
+MEASURE FactSales[Refunds] = CALCULATE ( SUM ( FactSales[returned_amount] ), FactSales[is_cancelled] = FALSE () )
+MEASURE FactSales[Net Revenue] = [NMV] - [Refunds]
+MEASURE FactSales[Orders] = CALCULATE ( DISTINCTCOUNT ( FactSales[order_id] ), FactSales[is_cancelled] = FALSE () )
+MEASURE FactSales[All Orders] = DISTINCTCOUNT ( FactSales[order_id] )
+MEASURE FactSales[Cancelled Orders] = CALCULATE ( DISTINCTCOUNT ( FactSales[order_id] ), FactSales[is_cancelled] = TRUE () )
+MEASURE FactSales[Cancellation Rate] = DIVIDE ( [Cancelled Orders], [All Orders] )
+MEASURE FactSales[Units] = CALCULATE ( SUM ( FactSales[quantity] ), FactSales[is_cancelled] = FALSE () )
+MEASURE FactSales[AOV] = DIVIDE ( [NMV], [Orders] )
+MEASURE FactSales[Delivered Lines] = CALCULATE ( COUNTROWS ( FactSales ), FactSales[is_delivered] = TRUE () )
+MEASURE FactSales[Returned Lines] = CALCULATE ( COUNTROWS ( FactSales ), FactSales[is_returned] = TRUE (), FactSales[is_delivered] = TRUE () )
+MEASURE FactSales[Return Rate] = DIVIDE ( [Returned Lines], [Delivered Lines] )
+MEASURE FactSales[COGS] = CALCULATE ( SUM ( FactSales[cost_amount] ), FactSales[is_kept] = TRUE () )
+MEASURE FactSales[Margin] = [Net Revenue] - [COGS]
+MEASURE FactSales[Margin %] = DIVIDE ( [Margin], [Net Revenue] )
+MEASURE FactSales[Active Customers] = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_cancelled] = FALSE (), FactSales[customer_key] <> -1 )
+
+// ---------------------------------------------------------------- profitability bridge (gross -> net)
+MEASURE FactSales[Cancelled Gross] = CALCULATE ( SUM ( FactSales[gross_amount] ), FactSales[is_cancelled] = TRUE () )
+MEASURE FactSales[Discounts Given] = CALCULATE ( SUM ( FactSales[discount_amount] ), FactSales[is_cancelled] = FALSE () )
+MEASURE FactSales[Effective Discount %] = DIVIDE ( [Discounts Given], CALCULATE ( SUM ( FactSales[gross_amount] ), FactSales[is_cancelled] = FALSE () ) )
+MEASURE FactSales[Gross to Net Gap] = [Gross Sales] - [Net Revenue]
+MEASURE FactSales[Net Revenue % of Gross] = DIVIDE ( [Net Revenue], [Gross Sales] )
+MEASURE FactSales[Shipping Cost] = SUM ( FactSales[shipping_fee] )
+MEASURE FactSales[Margin After Shipping] = [Margin] - [Shipping Cost]
+MEASURE FactSales[Margin After Shipping %] = DIVIDE ( [Margin After Shipping], [Net Revenue] )
+MEASURE FactSales[Net Revenue Share %] = DIVIDE ( [Net Revenue], CALCULATE ( [Net Revenue], ALLSELECTED () ) )
+MEASURE FactSales[NMV Share %] = DIVIDE ( [NMV], CALCULATE ( [NMV], ALLSELECTED () ) )
+
+// ---------------------------------------------------------------- time intelligence (use DimDate[month_start_date] as the month axis)
+MEASURE FactSales[Net Revenue PM] =
+    VAR m = [Latest Month]
+    RETURN CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+MEASURE FactSales[Net Revenue MoM %] =
+    VAR m = [Latest Month]
+    VAR cur = CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+    VAR prev = CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+    RETURN DIVIDE ( cur - prev, prev )
+MEASURE FactSales[NMV PM] =
+    VAR m = [Latest Month]
+    RETURN CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+MEASURE FactSales[NMV MoM %] =
+    VAR m = [Latest Month]
+    VAR cur = CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+    VAR prev = CALCULATE ( [NMV], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+    RETURN DIVIDE ( cur - prev, prev )
+MEASURE FactSales[Orders PM] =
+    VAR m = [Latest Month]
+    RETURN CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+MEASURE FactSales[Orders MoM %] =
+    VAR m = [Latest Month]
+    VAR cur = CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = m )
+    VAR prev = CALCULATE ( [Orders], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = EDATE ( m, -1 ) )
+    RETURN DIVIDE ( cur - prev, prev )
+MEASURE FactSales[Latest Month] =
+    VAR d = MAX ( FactSales[date_key] )
+    RETURN IF ( ISBLANK ( d ), BLANK (), DATE ( INT ( d / 10000 ), MOD ( INT ( d / 100 ), 100 ), 1 ) )
+MEASURE FactSales[Latest Month Label] = FORMAT ( [Latest Month], "mmm yyyy" )
+MEASURE FactSales[Latest MoM % Net Revenue] = [Net Revenue MoM %]
+MEASURE FactSales[Latest MoM % NMV] = [NMV MoM %]
+MEASURE FactSales[Latest MoM % Orders] = [Orders MoM %]
+MEASURE FactSales[Net Revenue 3M Avg] =
+    VAR m = [Latest Month]
+    VAR months = FILTER ( ALL ( DimDate[month_start_date] ), DimDate[month_start_date] > EDATE ( m, -3 ) && DimDate[month_start_date] <= m )
+    RETURN AVERAGEX ( months, VAR v = DimDate[month_start_date] RETURN CALCULATE ( [Net Revenue], REMOVEFILTERS ( DimDate ), DimDate[month_start_date] = v ) )
+
+// ---------------------------------------------------------------- festival / seasonality (normalised per selling day)
+MEASURE FactSales[Days With Sales] = COUNTROWS ( FILTER ( VALUES ( DimDate[full_date] ), [Gross Sales] > 0 ) )
+MEASURE FactSales[Avg Daily NMV] = DIVIDE ( [NMV], [Days With Sales] )
+MEASURE FactSales[Avg Daily Orders] = DIVIDE ( [Orders], [Days With Sales] )
+MEASURE FactSales[Avg Daily NMV Regular Days] = CALCULATE ( [Avg Daily NMV], DimDate[festival] = "Regular Day" )
+MEASURE FactSales[Festival Lift %] = DIVIDE ( [Avg Daily NMV], [Avg Daily NMV Regular Days] ) - 1
+
+// ---------------------------------------------------------------- customers
+MEASURE FactSales[New Customers] = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_first_order] = TRUE (), FactSales[customer_key] <> -1 )
+MEASURE FactSales[Returning Customers] = [Active Customers] - [New Customers]
+MEASURE FactSales[Repeat Customers] = CALCULATE ( DISTINCTCOUNT ( FactSales[customer_key] ), FactSales[is_cancelled] = FALSE (), DimCustomer[rfm_frequency] >= 2 )
+MEASURE FactSales[Repeat Purchase Rate] = DIVIDE ( [Repeat Customers], [Active Customers] )
+MEASURE FactSales[Observed CLV] = DIVIDE ( [Net Revenue], [Active Customers] )
+MEASURE FactSales[Observed CLV Margin] = DIVIDE ( [Margin], [Active Customers] )
+MEASURE FactSales[Orders per Customer] = DIVIDE ( [Orders], [Active Customers] )
+
+// ---------------------------------------------------------------- delivery and sellers (on-time = delivered within 5 days of shipping)
+MEASURE FactSales[On-Time Lines] = CALCULATE ( COUNTROWS ( FactSales ), FactSales[on_time_status] = "On Time" )
+MEASURE FactSales[Late Lines] = CALCULATE ( COUNTROWS ( FactSales ), FactSales[on_time_status] = "Late" )
+MEASURE FactSales[On-Time Delivery Rate] = DIVIDE ( [On-Time Lines], [On-Time Lines] + [Late Lines] )
+MEASURE FactSales[Avg Shipping Days] = CALCULATE ( AVERAGE ( FactSales[shipping_days] ), FactSales[is_delivered] = TRUE () )
+MEASURE FactSales[Avg Seller Quality Score] = AVERAGE ( DimSeller[quality_score] )
+
+// ---------------------------------------------------------------- geography
+MEASURE FactSales[Top 5 Cities NMV Share] =
+    VAR top5 = TOPN ( 5, FILTER ( ALLSELECTED ( DimLocation[city] ), DimLocation[city] <> "Unknown" ), [NMV], DESC )
+    RETURN DIVIDE ( SUMX ( top5, [NMV] ), CALCULATE ( [NMV], ALLSELECTED ( DimLocation ) ) )
+
+// ---------------------------------------------------------------- validation (compare with the expected values in the chat)
+EVALUATE
+ROW (
+    "Gross Sales", [Gross Sales],
+    "NMV", [NMV],
+    "Refunds", [Refunds],
+    "Net Revenue", [Net Revenue],
+    "Orders", [Orders],
+    "All Orders", [All Orders],
+    "Cancellation Rate", [Cancellation Rate],
+    "Units", [Units],
+    "AOV", [AOV],
+    "Delivered Lines", [Delivered Lines],
+    "Returned Lines", [Returned Lines],
+    "Return Rate", [Return Rate],
+    "COGS", [COGS],
+    "Margin", [Margin],
+    "Active Customers", [Active Customers],
+    "Top 5 Cities NMV Share", [Top 5 Cities NMV Share],
+    "Repeat Purchase Rate", [Repeat Purchase Rate],
+    "Observed CLV", [Observed CLV],
+    "New Customers", [New Customers]
+)

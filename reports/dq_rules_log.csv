@@ -1,0 +1,69 @@
+table,rule_id,column,issue,action,records_affected
+locations,LOC01,province,"Province spelling variants (Panjab, KP, Sind, GB ...)",Mapped to canonical province,93
+locations,LOC02,latitude/longitude,Missing or out-of-Pakistan coordinates,"Set to NULL (kept, flagged)",69
+locations,LOC03,province,Missing province,Imputed from nearest city by coordinates (flag province_imputed),25
+locations,LOC04,province,Missing province without coordinates,Set to 'Unknown',0
+sellers,SEL01,seller_tier,seller_tier case/whitespace variants and blanks,Title-cased; blank -> 'Unknown',86
+sellers,SEL02,join_date,Missing/invalid join_date,Retained as NULL (not needed for metrics),38
+sellers,SEL03,rating,Rating missing or outside 1-5,Imputed with tier median (flag rating_imputed),55
+sellers,SEL04,city_id,Seller city not in locations,Mapped to Unknown location (-1),0
+products,PRD01,category,Inconsistent category labels (62 raw variants),Standardised to 12 categories,1339
+products,PRD02,sub_category,Missing sub_category,Set to 'Unspecified',485
+products,PRD03,brand,Missing brand,Inferred from product name prefix; else 'Unknown',392
+products,PRD04,list_price,Invalid list_price (<=0 or sentinel 9999999),Repaired from median sold unit price / typical unit-to-list ratio (1.026),13
+products,PRD04b,list_price,Invalid list_price and product never sold,Left NULL (flag list_price_repaired),0
+products,PRD05,cost_price,"cost_price missing, <=0 or >120% of list price (75 of them above list)",Imputed = category median cost/list ratio x list_price (flag cost_imputed),237
+products,PRD06,weight_kg,"weight_kg missing, <=0 or >100",Imputed with category median (flag weight_imputed),313
+products,PRD07,seller_id,Product seller not in sellers,Report only (none expected),0
+products,PRD08,product_id,"Duplicate products under different IDs (same name+category, list price within 10%)",Merged to lowest product_id; mapping in product_map.csv,26
+payments,PAY01,,Exact duplicate payment rows,Removed (first kept),3296
+payments,PAY02,payment_method,payment_method label variants (21 raw),Standardised to 5 methods,36004
+payments,PAY03,payment_status,payment_status label variants (16 raw),Standardised to Paid/Cancelled/Refunded/Pending,40782
+payments,PAY04,amount,Negative payment amounts,Converted to absolute value,663
+payments,PAY05,payment_date,Missing/invalid payment_date,Kept as NULL,5994
+customers,CUS01,gender,Gender label variants/blank,Standardised to Male/Female/Unknown,40763
+customers,CUS02,phone,"Phone formats mixed (+92, dashes, spaces)",Normalised to 03XX-XXXXXXX; invalid -> blank,29112
+customers,CUS03,birth_year,Implausible birth_year (<1930 or >2010),Set to NULL,142
+customers,CUS04,city_id,Missing/invalid city_id,Mapped to Unknown location (-1) unless a duplicate record supplies it,2233
+customers,CUS05,customer_id,Duplicate customers under different IDs (same name AND same email or phone; never name alone),Merged to lowest customer_id; attributes coalesced; mapping in customer_map.csv,2556
+orders,ORD01,,Exact duplicate order rows,Removed (first kept),3200
+orders,ORD02,order_status,order_status variants (19 raw labels),Standardised to Delivered/Cancelled/Returned/In Transit,38750
+orders,ORD03,channel,channel variants (12 raw labels),Standardised to App/Web/Mobile Web,23830
+orders,ORD04,discount_code,discount_code case/whitespace variants (25 raw values),Upper-cased; percentage extracted,4005
+orders,ORD05,customer_id,Orders whose customer_id is not in customers (broken reference),Mapped to Unknown customer member,321
+orders,ORD06,order_date,"Unparseable order_date (e.g. 00/00/2024, 2024-13-05, 2024-02-30)",Repaired from other data (see ORD08),1124
+orders,ORD07,order_date,order_date outside 1 Jan 2024 - 30 Jun 2025,Repaired from other data (see ORD08),481
+orders,ORD08,order_date,Order dates repaired: payment_date (non-COD) > shipped_date-1 > neighbouring order_id,Repaired,1605
+orders,ORD09,ship_city_id,Missing ship_city_id,Repaired with the customer's registered city (89% of known orders ship to it),6082
+orders,ORD10,ship_city_id,Missing ship_city_id and no usable customer city,Mapped to Unknown location (-1),306
+order_items,ITM01,order_id,Line items whose order is missing/quarantined,Quarantined,0
+order_items,ITM02,quantity,"quantity written as words/decimals (one, 2.0)",Converted to integer,5767
+order_items,ITM03,quantity,Negative quantity,Converted to absolute value,307
+order_items,ITM04,unit_price,Negative unit_price,Converted to absolute value,316
+order_items,ITM05,unit_price,"Implausible unit_price (0, sentinel 9999999, x100, <50% or >200% of product's typical price)",Replaced with product's median valid unit price (flag price_repaired),1252
+order_items,ITM05b,unit_price,Implausible unit_price with no reference price,Quarantined,0
+order_items,ITM06,quantity,Quantity outlier (500) / missing,"Back-solved from order_total when possible (634), else 1 (7)",641
+order_items,ITM07,discount_amount,discount_amount blank while order has a discount code,Set to line gross x order discount %,10183
+order_items,ITM08,discount_amount,"discount_amount > line gross, negative, or inconsistent with order discount %",Set to line gross x order discount %,875
+order_items,ITM09,discount_amount,discount_amount blank and no discount code,Set to 0,21384
+order_items,ITM10,product_id,Line items whose product_id is not in products (broken reference),Mapped to Unknown product member (line kept in sales),932
+order_items,ITM11,seller_id,Line items whose seller_id is not in sellers,Mapped to Unknown seller member,0
+shipping,SHP01,courier,Courier name variants (22 raw),Standardised to 6 couriers,30368
+shipping,SHP02,delivery_status,delivery_status variants (15 raw),Standardised to Delivered/In Transit/Returned to Seller,37699
+shipping,SHP03,shipped_date,shipped_date missing/unparseable,Imputed as order_date + 1 day (modal lag) (flag shipped_imputed),6965
+shipping,SHP04,shipped_date,shipped_date before order_date or >30 days after,Imputed as order_date + 1 day,13
+shipping,SHP05,delivered_date,INVALID_DELIVERED_DATE,delivered_date set to NULL (cannot be repaired reliably); shipment kept,924
+shipping,SHP05,delivered_date,DELIVERED_BEFORE_SHIPPED,delivered_date set to NULL (cannot be repaired reliably); shipment kept,1345
+shipping,SHP05,delivered_date,DELIVERY_OVER_30_DAYS,delivered_date set to NULL (cannot be repaired reliably); shipment kept,278
+shipping,SHP06,shipping_fee,Negative shipping_fee,Converted to absolute value,159
+shipping,SHP07,shipping_fee,"shipping_fee missing, zero or sentinel (9999999)",Imputed with courier median (flag fee_imputed),9440
+shipping,SHP08,order_id,Multiple shipments per order,Report only (none expected),0
+returns,RET01,order_item_id,Returns referencing a non-existent order_item_id (broken reference),Quarantined to rejects (no line to attach to),139
+returns,RET02,return_status,return_status variants (Refund/Refunded/Declined...),Standardised to Refunded/Approved/Rejected,3965
+returns,RET03,return_reason,return_reason free-text variants (38 raw) and blanks,Mapped to 9 reasons; blank -> 'Unknown',15909
+returns,RET04,refund_amount,Valid refund_amount greater than the returned line's net value (inflated ~1.4x),Capped at line net value (flag refund_capped),248
+returns,RET05,refund_amount,Valid return with blank refund_amount,Set to line net value,0
+returns,RET06,return_date,Return date missing/invalid or before order date,Kept as NULL (ReturnDateKey -> Unknown date),256
+returns,RET07,order_item_id,Multiple returns for the same order line,Aggregated per line in fact build (valid returns only),0
+customers,CUS06,registration_date,registration_date missing/invalid or after first order or after 30 Jun 2025,Set to first order date when the customer has orders (flag reg_repaired); else NULL,235
+customers,CUS07,registration_date,registration_date still missing (customer has no orders),Left NULL,54

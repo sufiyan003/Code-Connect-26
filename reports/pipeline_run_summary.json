@@ -1,0 +1,353 @@
+{
+  "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+  "checks_total": 37,
+  "checks_failed": [],
+  "tasks": [
+    {
+      "task": "extract",
+      "status": "success",
+      "read": 863000,
+      "rejected": 0,
+      "loaded": 0,
+      "message": "9 raw files found (5.2s)"
+    },
+    {
+      "task": "validate_raw",
+      "status": "success",
+      "read": 863000,
+      "rejected": 0,
+      "loaded": 0,
+      "message": "profile written; 6496 exact duplicate rows found in raw files (8.4s)"
+    },
+    {
+      "task": "clean",
+      "status": "success",
+      "read": 863000,
+      "rejected": 11764,
+      "loaded": 853783,
+      "message": "order_total reconciliation 99.27% (47.1s)"
+    },
+    {
+      "task": "load_staging",
+      "status": "success",
+      "read": 901983,
+      "rejected": 11764,
+      "loaded": 901983,
+      "message": "staging reloaded (truncate + COPY) (7.5s)"
+    },
+    {
+      "task": "build_dimensions",
+      "status": "success",
+      "read": 47789,
+      "rejected": 0,
+      "loaded": 47789,
+      "message": "{\"dim_date\": 1097, \"dim_customer\": 42445, \"dim_product\": 3175, \"dim_seller\": 421, \"dim_location\": 651} (1.6s)"
+    },
+    {
+      "task": "build_fact",
+      "status": "success",
+      "read": 315143,
+      "rejected": 0,
+      "loaded": 315143,
+      "message": "FactSales rebuilt (grain = order line); RFM segments and seller scores refreshed (28.3s)"
+    }
+  ],
+  "checks": [
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_locations",
+      "severity": "critical",
+      "expected": "650",
+      "actual": "650",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_sellers",
+      "severity": "critical",
+      "expected": "420",
+      "actual": "420",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_products",
+      "severity": "critical",
+      "expected": "3200",
+      "actual": "3200",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_orders",
+      "severity": "critical",
+      "expected": "163200",
+      "actual": "163200",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_order_items",
+      "severity": "critical",
+      "expected": "315143",
+      "actual": "315143",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_payments",
+      "severity": "critical",
+      "expected": "168111",
+      "actual": "168111",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_shipping",
+      "severity": "critical",
+      "expected": "151228",
+      "actual": "151228",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_returns",
+      "severity": "critical",
+      "expected": "16048",
+      "actual": "16048",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "row_conservation_customers",
+      "severity": "critical",
+      "expected": "45000",
+      "actual": "45000",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "duplicates_logged_in_rejects",
+      "severity": "critical",
+      "expected": "6496",
+      "actual": "6496",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "fact_rows_equal_staged_order_lines",
+      "severity": "critical",
+      "expected": "315143",
+      "actual": "315143",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "fact_grain_unique_order_item",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "orders_in_fact_equal_staged_orders",
+      "severity": "critical",
+      "expected": "160000",
+      "actual": "160000",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "no_null_foreign_keys",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_member_dim_customer",
+      "severity": "critical",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_member_dim_product",
+      "severity": "critical",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_member_dim_seller",
+      "severity": "critical",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_member_dim_location",
+      "severity": "critical",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_member_dim_date",
+      "severity": "critical",
+      "expected": "1",
+      "actual": "1",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_customer_share_pct_max_2",
+      "severity": "critical",
+      "expected": "<= 2",
+      "actual": "0.201",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_product_share_pct_max_2",
+      "severity": "critical",
+      "expected": "<= 2",
+      "actual": "0.296",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_seller_share_pct_max_2",
+      "severity": "critical",
+      "expected": "<= 2",
+      "actual": "0.000",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "unknown_location_share_pct_max_2",
+      "severity": "critical",
+      "expected": "<= 2",
+      "actual": "0.191",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "dimensions_not_linked_to_each_other",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "nmv_fact_equals_staging",
+      "severity": "critical",
+      "expected": "<= 1 PKR",
+      "actual": "0.00",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "gross_fact_equals_staging",
+      "severity": "critical",
+      "expected": "<= 1 PKR",
+      "actual": "0.00",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "shipping_fee_allocated_without_double_count",
+      "severity": "critical",
+      "expected": "<= 1 PKR",
+      "actual": "0.0050",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "refunds_fact_equals_valid_returns",
+      "severity": "critical",
+      "expected": "<= 1 PKR",
+      "actual": "0.00",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "returned_lines_equal_distinct_valid_returns",
+      "severity": "critical",
+      "expected": "14598",
+      "actual": "14598",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "rejected_returns_not_counted",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "no_negative_or_zero_amounts",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "order_dates_inside_valid_window",
+      "severity": "critical",
+      "expected": "2024-01-01..2025-06-30",
+      "actual": "2024-01-01..2025-06-30",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "order_total_reconciliation_pct_min_98",
+      "severity": "critical",
+      "expected": ">= 98",
+      "actual": "99.27",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "rfm_segment_assigned_to_every_buyer",
+      "severity": "critical",
+      "expected": "31490",
+      "actual": "31490",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "every_selling_seller_has_score_0_100",
+      "severity": "critical",
+      "expected": "0",
+      "actual": "0",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "cancellation_rate_plausible_2_to_30",
+      "severity": "warning",
+      "expected": "2..30",
+      "actual": "9.16",
+      "passed": true
+    },
+    {
+      "run_id": "scheduled__2026-10-17T00:00:00+00:00",
+      "check": "return_rate_plausible_0_to_40",
+      "severity": "warning",
+      "expected": "0..40",
+      "actual": "5.15",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+table,rows_raw,exact_duplicates_removed,rows_rejected,rows_clean
+locations,650,0,0,650
+sellers,420,0,0,420
+products,3200,0,26,3174
+orders,163200,3200,0,160000
+order_items,315143,0,0,315143
+payments,168111,3296,0,164815
+shipping,151228,0,0,151228
+returns,16048,0,139,15909
+customers,45000,0,2556,42444
